@@ -7,13 +7,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #080808;
-    --surface: #101010;
-    --border: #1e1e1e;
+    --bg: #050505;
+    --surface: rgba(18, 18, 18, 0.6);
+    --surface-hover: rgba(30, 30, 30, 0.8);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(200, 255, 0, 0.4);
     --accent: #c8ff00;
+    --accent-glow: rgba(200, 255, 0, 0.2);
     --accent2: #ff4d00;
     --text: #e8e8e8;
-    --muted: #666;
+    --muted: #888;
     --white: #fff;
   }
 
@@ -22,10 +25,35 @@
   html { scroll-behavior: smooth; }
 
   body {
-    background: var(--bg);
+    background-color: var(--bg);
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(200,255,0,0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(255,77,0,0.03) 0px, transparent 50%);
+    background-attachment: fixed;
     color: var(--text);
     font-family: 'Space Mono', monospace;
     overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Grid overlay for texture */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+
+
+  /* Main content wrapper to sit above the glow */
+  .main-content {
+    position: relative;
+    z-index: 1;
   }
 
   /* NAV */
@@ -33,23 +61,40 @@
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; justify-content: space-between; align-items: center;
     padding: 1.2rem 3rem;
-    background: rgba(8,8,8,0.92);
-    backdrop-filter: blur(10px);
+    background: rgba(5,5,5,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
+    transition: transform 0.4s ease;
   }
   .nav-logo {
     font-family: 'Syne', sans-serif;
-    font-weight: 800; font-size: 1.3rem;
-    color: var(--accent);
+    font-weight: 800; font-size: 1.5rem;
+    color: var(--white);
     letter-spacing: 0.05em;
+    position: relative;
   }
-  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-logo::after {
+    content: '.';
+    color: var(--accent);
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
   .nav-links a {
-    color: var(--muted); text-decoration: none;
-    font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
-    transition: color 0.2s;
+    color: var(--text); text-decoration: none;
+    font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 2px;
+    background: var(--accent);
+    transition: width 0.3s ease;
   }
   .nav-links a:hover { color: var(--accent); }
+  .nav-links a:hover::after { width: 100%; }
 
   /* HERO */
   .hero {
@@ -59,80 +104,110 @@
     align-items: center;
     padding: 8rem 6rem 4rem;
     position: relative;
-    overflow: hidden;
   }
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -200px; right: -100px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(200,255,0,0.06) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .hero-text { z-index: 2; }
   .hero-eyebrow {
-    font-size: 0.72rem; letter-spacing: 0.25em;
+    font-size: 0.75rem; letter-spacing: 0.3em;
     text-transform: uppercase; color: var(--accent);
-    margin-bottom: 1.2rem;
-    display: flex; align-items: center; gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
   }
   .hero-eyebrow::before {
     content: ''; display: block;
-    width: 32px; height: 1px; background: var(--accent);
+    width: 40px; height: 1px; background: var(--accent);
   }
   .hero-name {
     font-family: 'Syne', sans-serif;
-    font-size: clamp(3.5rem, 7vw, 6rem);
+    font-size: clamp(3.5rem, 7vw, 6.5rem);
     font-weight: 800;
-    line-height: 0.95;
-    color: var(--white);
+    line-height: 1;
     margin-bottom: 1.2rem;
+    background: linear-gradient(to right, #fff, #888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .hero-name span { color: var(--accent); }
+  .hero-name span { 
+    background: linear-gradient(to right, var(--accent), #7a9c00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
   .hero-title {
-    font-size: 0.85rem; color: var(--muted);
-    letter-spacing: 0.08em; margin-bottom: 2.5rem;
+    font-size: 0.9rem; color: var(--muted);
+    letter-spacing: 0.1em; margin-bottom: 2.5rem;
+    line-height: 1.6;
+    max-width: 80%;
   }
   .hero-contact {
-    display: flex; flex-direction: column; gap: 0.5rem;
-    font-size: 0.8rem; color: var(--muted); margin-bottom: 2.5rem;
+    display: flex; flex-direction: column; gap: 0.8rem;
+    font-size: 0.85rem; color: var(--text); margin-bottom: 3rem;
   }
-  .hero-contact a { color: var(--muted); text-decoration: none; }
+  .hero-contact span { display: flex; align-items: center; gap: 0.5rem; }
+  .hero-contact a { color: var(--text); text-decoration: none; transition: color 0.3s; }
   .hero-contact a:hover { color: var(--accent); }
-  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+  
+  .hero-btns { display: flex; gap: 1.5rem; flex-wrap: wrap; }
   .btn {
-    padding: 0.75rem 2rem;
+    padding: 1rem 2.5rem;
     font-family: 'Space Mono', monospace;
-    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase;
+    font-weight: 700;
     border: 1px solid; cursor: pointer; text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
   }
-  .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
-  .btn-primary:hover { background: transparent; color: var(--accent); }
-  .btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { 
+    background: var(--accent); color: #000; border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(200, 255, 0, 0.2);
+  }
+  .btn-primary:hover { 
+    background: transparent; color: var(--accent); 
+    box-shadow: 0 0 30px rgba(200, 255, 0, 0.4);
+    transform: translateY(-3px);
+  }
+  .btn-ghost { background: rgba(255,255,255,0.03); color: var(--white); border-color: var(--border); backdrop-filter: blur(5px); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: transparent; transform: translateY(-3px); }
 
   .hero-photo {
     position: relative; display: flex; justify-content: center; align-items: center;
   }
   .photo-frame {
-    position: relative; width: 380px; height: 480px;
+    position: relative; width: 400px; height: 500px;
   }
   .photo-frame::before {
     content: ''; position: absolute;
-    top: 16px; left: 16px; right: -16px; bottom: -16px;
-    border: 1px solid var(--accent); z-index: 0;
+    top: 20px; left: 20px; right: -20px; bottom: -20px;
+    border: 1px solid var(--border); z-index: 0;
+    transition: all 0.5s ease;
+  }
+  .hero-photo:hover .photo-frame::before {
+    transform: translate(10px, 10px);
+    border-color: var(--accent);
+    box-shadow: inset 0 0 20px rgba(200, 255, 0, 0.1);
   }
   .photo-frame img {
     width: 100%; height: 100%; object-fit: cover;
     position: relative; z-index: 1;
-    filter: grayscale(20%) contrast(1.05);
+    filter: grayscale(80%) contrast(1.1);
+    transition: all 0.5s ease;
+  }
+  .hero-photo:hover .photo-frame img {
+    filter: grayscale(0%) contrast(1.05);
+    transform: translate(-5px, -5px);
   }
   .photo-tag {
-    position: absolute; bottom: -24px; right: -24px; z-index: 2;
-    background: var(--accent); color: #000;
-    padding: 0.5rem 1rem; font-size: 0.7rem;
+    position: absolute; bottom: -20px; right: -20px; z-index: 2;
+    background: var(--surface); color: var(--white);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    padding: 0.8rem 1.5rem; font-size: 0.75rem;
     letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+  }
+  .hero-photo:hover .photo-tag {
+    background: var(--accent); color: #000;
+    transform: scale(1.05);
   }
 
   /* STATS BAR */
@@ -140,558 +215,646 @@
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     display: grid; grid-template-columns: repeat(4, 1fr);
-    background: var(--surface);
+    background: rgba(10,10,10,0.4);
+    backdrop-filter: blur(10px);
   }
   .stat-item {
-    padding: 2rem; text-align: center;
+    padding: 3rem 2rem; text-align: center;
     border-right: 1px solid var(--border);
+    transition: background 0.3s ease;
   }
+  .stat-item:hover { background: rgba(255,255,255,0.02); }
   .stat-item:last-child { border-right: none; }
   .stat-num {
     font-family: 'Syne', sans-serif;
-    font-size: 2.2rem; font-weight: 800;
-    color: var(--accent); line-height: 1;
-    margin-bottom: 0.4rem;
+    font-size: 2.8rem; font-weight: 800;
+    color: var(--white); line-height: 1;
+    margin-bottom: 0.8rem;
+    background: linear-gradient(to bottom, var(--accent), #fff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .stat-label { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .stat-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
 
   /* SECTIONS */
-  section { padding: 6rem 6rem; }
+  section { padding: 8rem 6rem; position: relative; }
   .section-header {
     display: flex; align-items: center; gap: 1.5rem;
-    margin-bottom: 4rem;
+    margin-bottom: 5rem;
   }
   .section-num {
-    font-size: 0.72rem; color: var(--accent);
+    font-size: 1rem; color: transparent;
+    -webkit-text-stroke: 1px var(--accent);
     letter-spacing: 0.2em; text-transform: uppercase;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
   }
   .section-title {
     font-family: 'Syne', sans-serif;
-    font-size: 2.5rem; font-weight: 800; color: var(--white);
+    font-size: 3rem; font-weight: 800; color: var(--white);
+    letter-spacing: -0.02em;
   }
   .section-line {
-    flex: 1; height: 1px; background: var(--border);
+    flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  /* CARDS GENERAL (Glassmorphism) */
+  .glass-card {
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+  .glass-card:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-hover);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px -10px rgba(0,0,0,0.5), 0 0 20px rgba(200, 255, 0, 0.05);
+    z-index: 2;
   }
 
   /* EXPERIENCE */
-  .exp-grid { display: flex; flex-direction: column; gap: 2rem; }
-  .exp-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 2rem;
-    position: relative;
-    transition: border-color 0.2s;
-  }
-  .exp-card:hover { border-color: var(--accent); }
+  .exp-grid { display: flex; flex-direction: column; gap: 2.5rem; }
+  .exp-card { padding: 3rem; }
   .exp-card::before {
     content: ''; position: absolute;
-    left: 0; top: 0; bottom: 0; width: 3px;
+    left: 0; top: 0; bottom: 0; width: 4px;
     background: var(--accent);
+    transition: width 0.3s ease;
   }
-  .exp-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
-  .exp-role { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--white); }
-  .exp-company { color: var(--accent); font-size: 0.85rem; margin-top: 0.2rem; }
+  .exp-card:hover::before { width: 100%; opacity: 0.03; }
+  .exp-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .exp-role { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--white); }
+  .exp-company { color: var(--accent); font-size: 1rem; margin-top: 0.4rem; font-weight: bold; }
   .exp-period {
-    font-size: 0.72rem; color: var(--muted);
-    border: 1px solid var(--border); padding: 0.3rem 0.8rem;
-    letter-spacing: 0.1em;
+    font-size: 0.8rem; color: var(--muted);
+    border: 1px solid var(--border); padding: 0.5rem 1rem;
+    letter-spacing: 0.15em; border-radius: 20px;
+    background: rgba(0,0,0,0.2);
   }
-  .exp-bullets { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+  .exp-bullets { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
   .exp-bullets li {
-    font-size: 0.82rem; color: #aaa; padding-left: 1rem; position: relative;
+    font-size: 0.9rem; color: #aaa; padding-left: 1.5rem; position: relative; line-height: 1.6;
   }
   .exp-bullets li::before {
-    content: '▸'; position: absolute; left: 0; color: var(--accent);
+    content: '▸'; position: absolute; left: 0; color: var(--accent); font-size: 1.2rem; top: -2px;
   }
 
   /* SKILLS */
-  .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-  .skill-group {
-    background: var(--surface); border: 1px solid var(--border); padding: 1.5rem;
-  }
+  .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+  .skill-group { padding: 2rem; }
   .skill-group-title {
-    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 1rem;
+    font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--white); margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
   }
-  .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .skill-group-title::after { content: ''; height: 1px; flex: 1; background: var(--border); }
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 0.8rem; }
   .skill-tag {
-    background: var(--bg); border: 1px solid var(--border);
-    padding: 0.3rem 0.8rem; font-size: 0.72rem; color: var(--text);
-    letter-spacing: 0.08em;
-    transition: all 0.2s;
+    background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+    padding: 0.5rem 1.2rem; font-size: 0.8rem; color: var(--text);
+    letter-spacing: 0.1em; border-radius: 4px;
+    transition: all 0.3s ease;
   }
-  .skill-tag:hover { border-color: var(--accent); color: var(--accent); }
+  .skill-tag:hover { 
+    border-color: var(--accent); color: #000; background: var(--accent);
+    transform: translateY(-2px); box-shadow: 0 5px 15px rgba(200, 255, 0, 0.2);
+  }
 
   /* PROJECTS */
-  .projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-  .project-card {
-    background: var(--surface); border: 1px solid var(--border); padding: 2rem;
-    position: relative; overflow: hidden;
-    transition: border-color 0.25s, transform 0.25s;
-  }
-  .project-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+  .project-card { padding: 3rem 2rem; display: flex; flex-direction: column; height: 100%; }
   .project-card::after {
     content: ''; position: absolute; top: 0; right: 0;
     width: 0; height: 3px; background: var(--accent);
-    transition: width 0.3s;
+    transition: width 0.4s ease;
   }
   .project-card:hover::after { width: 100%; }
   .project-num {
     font-family: 'Syne', sans-serif;
-    font-size: 3rem; font-weight: 800;
-    color: var(--border); position: absolute;
-    top: 1rem; right: 1.5rem; line-height: 1;
+    font-size: 4rem; font-weight: 800;
+    color: transparent; -webkit-text-stroke: 1px var(--border);
+    position: absolute; top: 1rem; right: 1.5rem; line-height: 1;
+    transition: all 0.4s ease;
   }
-  .project-stack { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+  .project-card:hover .project-num { -webkit-text-stroke: 1px var(--accent); opacity: 0.5; }
+  .project-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; position: relative; z-index: 1; }
   .project-tech {
-    background: rgba(200,255,0,0.08); color: var(--accent);
-    padding: 0.2rem 0.6rem; font-size: 0.65rem; letter-spacing: 0.1em;
-    text-transform: uppercase;
+    background: rgba(200,255,0,0.05); color: var(--accent);
+    padding: 0.3rem 0.8rem; font-size: 0.7rem; letter-spacing: 0.15em;
+    text-transform: uppercase; border: 1px solid rgba(200,255,0,0.1);
+    border-radius: 20px;
   }
   .project-title {
-    font-family: 'Syne', sans-serif; font-size: 1.1rem;
-    font-weight: 700; color: var(--white); margin-bottom: 1rem;
+    font-family: 'Syne', sans-serif; font-size: 1.5rem;
+    font-weight: 700; color: var(--white); margin-bottom: 1.5rem;
+    position: relative; z-index: 1;
   }
-  .project-bullets { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
-  .project-bullets li { font-size: 0.78rem; color: #999; padding-left: 1rem; position: relative; }
-  .project-bullets li::before { content: '→'; position: absolute; left: 0; color: var(--accent2); font-size: 0.65rem; top: 2px; }
+  .project-bullets { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; flex: 1; position: relative; z-index: 1; }
+  .project-bullets li { font-size: 0.85rem; color: #999; padding-left: 1.2rem; position: relative; line-height: 1.5; }
+  .project-bullets li::before { content: '→'; position: absolute; left: 0; color: var(--accent2); font-size: 0.8rem; top: 0px; }
 
   /* HACKATHONS */
-  .hackathon-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-  .hackathon-card {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 1.8rem; display: flex; gap: 1.5rem; align-items: flex-start;
-    transition: border-color 0.2s;
-  }
-  .hackathon-card:hover { border-color: var(--accent2); }
+  .hackathon-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+  .hackathon-card { padding: 2.5rem; display: flex; gap: 2rem; align-items: flex-start; }
   .hack-icon {
-    font-size: 1.8rem; flex-shrink: 0;
-    width: 52px; height: 52px;
-    background: rgba(255,77,0,0.1); display: flex; align-items: center;
+    font-size: 2rem; flex-shrink: 0;
+    width: 70px; height: 70px; border-radius: 50%;
+    background: rgba(255,77,0,0.05); display: flex; align-items: center;
     justify-content: center; border: 1px solid rgba(255,77,0,0.2);
+    box-shadow: inset 0 0 20px rgba(255,77,0,0.05);
+    transition: all 0.4s ease;
+  }
+  .hackathon-card:hover .hack-icon {
+    background: var(--accent2); transform: rotate(10deg) scale(1.1); color: #fff;
   }
   .hack-badge {
     display: inline-block; background: var(--accent2); color: #fff;
-    padding: 0.2rem 0.6rem; font-size: 0.65rem; letter-spacing: 0.1em;
-    text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700;
+    padding: 0.3rem 0.8rem; font-size: 0.7rem; letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 1rem; font-weight: 700;
+    border-radius: 20px;
   }
-  .hack-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 0.5rem; }
-  .hack-desc { font-size: 0.78rem; color: #999; line-height: 1.6; }
+  .hack-title { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--white); margin-bottom: 0.8rem; }
+  .hack-desc { font-size: 0.85rem; color: #999; line-height: 1.7; }
 
   /* CERTIFICATIONS */
-  .cert-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .cert-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
   .cert-item {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1rem;
-    transition: border-color 0.2s;
+    padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1.5rem;
   }
-  .cert-item:hover { border-color: var(--accent); }
   .cert-dot {
-    width: 8px; height: 8px; background: var(--accent);
+    width: 10px; height: 10px; background: var(--accent);
     border-radius: 50%; flex-shrink: 0;
+    box-shadow: 0 0 10px var(--accent);
+    transition: transform 0.3s ease;
   }
-  .cert-text { font-size: 0.8rem; color: var(--text); }
+  .cert-item:hover .cert-dot { transform: scale(1.5); }
+  .cert-text { font-size: 0.85rem; color: var(--text); line-height: 1.4; }
   .cert-badge {
-    margin-left: auto; font-size: 0.65rem; color: var(--accent);
-    border: 1px solid rgba(200,255,0,0.3); padding: 0.2rem 0.5rem;
-    flex-shrink: 0;
+    margin-left: auto; font-size: 0.7rem; color: var(--accent);
+    border: 1px solid rgba(200,255,0,0.3); padding: 0.3rem 0.8rem;
+    flex-shrink: 0; border-radius: 4px; background: rgba(200,255,0,0.05);
+    font-weight: 700; letter-spacing: 0.1em;
+  }
+
+  /* EDUCATION */
+  .edu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+  .edu-card { padding: 3rem; }
+  .edu-card::before {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px; background: linear-gradient(90deg, var(--accent), transparent);
+    transition: height 0.3s ease;
+  }
+  .edu-card:hover::before { height: 6px; }
+  .edu-degree { font-size: 0.8rem; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1rem; font-weight: 700; }
+  .edu-school { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--white); margin-bottom: 0.5rem; }
+  .edu-detail { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .edu-score {
+    display: inline-block;
+    background: rgba(200,255,0,0.08); color: var(--accent);
+    padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 700;
+    border: 1px solid rgba(200,255,0,0.2); border-radius: 4px;
   }
 
   /* FOOTER */
   footer {
     border-top: 1px solid var(--border);
-    padding: 3rem 6rem;
+    padding: 4rem 6rem;
     display: flex; justify-content: space-between; align-items: center;
-    background: var(--surface);
+    background: rgba(5,5,5,0.8);
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 1;
   }
   .footer-logo {
-    font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent);
+    font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--white);
   }
-  .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+  .footer-logo span { color: var(--accent); }
+  .footer-links { display: flex; gap: 2rem; list-style: none; }
   .footer-links a {
-    color: var(--muted); text-decoration: none; font-size: 0.78rem;
-    letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.2s;
+    color: var(--text); text-decoration: none; font-size: 0.8rem;
+    letter-spacing: 0.15em; text-transform: uppercase; transition: all 0.3s;
   }
-  .footer-links a:hover { color: var(--accent); }
-  .footer-copy { font-size: 0.72rem; color: var(--muted); }
+  .footer-links a:hover { color: var(--accent); text-shadow: 0 0 10px rgba(200,255,0,0.3); }
+  .footer-copy { font-size: 0.8rem; color: var(--muted); }
 
-  /* EDUCATION */
-  .edu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-  .edu-card {
-    background: var(--surface); border: 1px solid var(--border); padding: 2rem;
-    position: relative;
+  /* ANIMATIONS - SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .edu-card::before {
-    content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-    height: 2px; background: linear-gradient(90deg, var(--accent), transparent);
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
   }
-  .edu-degree { font-size: 0.7rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.5rem; }
-  .edu-school { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 0.3rem; }
-  .edu-detail { font-size: 0.78rem; color: var(--muted); }
-  .edu-score {
-    display: inline-block; margin-top: 1rem;
-    background: rgba(200,255,0,0.1); color: var(--accent);
-    padding: 0.3rem 1rem; font-size: 0.78rem; font-weight: 700;
-    border: 1px solid rgba(200,255,0,0.2);
-  }
-
-  /* ANIMATIONS */
+  
+  /* Initial Hero Load Animation */
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
+    from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  .hero-text > * {
-    animation: fadeUp 0.7s ease both;
-  }
-  .hero-eyebrow { animation-delay: 0.1s; }
-  .hero-name { animation-delay: 0.2s; }
-  .hero-title { animation-delay: 0.3s; }
-  .hero-contact { animation-delay: 0.4s; }
-  .hero-btns { animation-delay: 0.5s; }
-  .hero-photo { animation: fadeUp 0.8s 0.3s ease both; }
+  .hero-text > * { opacity: 0; animation: fadeUp 0.8s ease forwards; }
+  .hero-eyebrow { animation-delay: 0.2s; }
+  .hero-name { animation-delay: 0.4s; }
+  .hero-title { animation-delay: 0.6s; }
+  .hero-contact { animation-delay: 0.8s; }
+  .hero-btns { animation-delay: 1.0s; }
+  .hero-photo { opacity: 0; animation: fadeUp 1s 0.6s ease forwards; }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1024px) {
+    .hero { padding: 8rem 3rem 4rem; }
+    section { padding: 6rem 3rem; }
+    .projects-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
     nav { padding: 1rem 1.5rem; }
     .nav-links { display: none; }
-    .hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 3rem; gap: 3rem; }
+    .hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 3rem; gap: 4rem; text-align: center; }
+    .hero-eyebrow { justify-content: center; }
+    .hero-eyebrow::before { display: none; }
+    .hero-title { max-width: 100%; margin: 0 auto 2rem; }
+    .hero-contact { align-items: center; }
+    .hero-btns { justify-content: center; }
     .hero-photo { order: -1; }
-    .photo-frame { width: 280px; height: 360px; }
+    .photo-frame { width: 300px; height: 380px; }
     .stats-bar { grid-template-columns: repeat(2, 1fr); }
     section { padding: 4rem 1.5rem; }
     .skills-grid, .projects-grid, .hackathon-grid, .cert-grid, .edu-grid { grid-template-columns: 1fr; }
-    footer { flex-direction: column; gap: 1.5rem; padding: 2rem 1.5rem; text-align: center; }
+    footer { flex-direction: column; gap: 2rem; padding: 3rem 1.5rem; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; }
   }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="nav-logo">HARI S</div>
-  <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#experience">Experience</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#hackathons">Hackathons</a></li>
-    <li><a href="#certifications">Certifications</a></li>
-  </ul>
-</nav>
+<div class="main-content">
+  <nav id="navbar">
+    <div class="nav-logo">HARI S</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+    </ul>
+  </nav>
 
-<!-- HERO -->
-<section class="hero" id="about">
-  <div class="hero-text">
-    <div class="hero-eyebrow">Java Full Stack Developer</div>
-    <h1 class="hero-name">HARI<br><span>S</span></h1>
-    <p class="hero-title">// Building scalable systems · IoT · AI · Backend Engineering</p>
-    <div class="hero-contact">
-      <span>📧 <a href="mailto:haris21sundar@gmail.com">haris21sundar@gmail.com</a></span>
-      <span>📞 <a href="tel:+919150119115">+91 9150119115</a></span>
-      <span>📍 Aruppukottai, Tamil Nadu</span>
+  <!-- HERO -->
+  <section class="hero" id="about">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Java Full Stack Developer</div>
+      <h1 class="hero-name">HARI<br><span>SUNDAR</span></h1>
+      <p class="hero-title">// Building scalable systems · IoT · AI · Backend Engineering. Passionate about writing clean code and solving complex problems.</p>
+      <div class="hero-contact">
+        <span>📧 <a href="mailto:haris21sundar@gmail.com">haris21sundar@gmail.com</a></span>
+        <span>📞 <a href="tel:+919150119115">+91 9150119115</a></span>
+        <span>📍 Aruppukottai, Tamil Nadu</span>
+      </div>
+      <div class="hero-btns">
+        <a class="btn btn-primary" href="mailto:haris21sundar@gmail.com">Get In Touch</a>
+        <a class="btn btn-ghost" href="#projects">View Projects</a>
+      </div>
     </div>
-    <div class="hero-btns">
-      <a class="btn btn-primary" href="mailto:haris21sundar@gmail.com">Get In Touch</a>
-      <a class="btn btn-ghost" href="#projects">View Projects</a>
+    <div class="hero-photo">
+      <div class="photo-frame">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&h=500&auto=format&fit=crop" alt="Hari S">
+        <div class="photo-tag">CSE · CGPA 8.87</div>
+      </div>
     </div>
-  </div>
-  <div class="hero-photo">
-    <div class="photo-frame">
-      <img src="data:image/jpeg;base64,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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFEsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGs7MywAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAalJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAqwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFmi51gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAazoZsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFlIAAAAAAC1TMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0QyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABWhneCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAu89DGNZFlIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABZTW8jEAABZRLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABZo6Y3yIACwALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAazo3z3ggAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKCAAAAAAAAAAAAAAAAAAbzRmwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAreTKwAAAAAAAKIoiwAAAAAAFFUwsBSKIAAoiiKIsAACiLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/xAAC/9oADAMBAAIAAwAAACGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSShCAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABRgAACSgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAABAgywgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwATgSggQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABygAhyADygAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADCijgBggAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABiDwSBAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABTzizxCzgxjCwAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAABTBQAwxgzygAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAASARgDTxxDBwAwwwAAAAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAACzyjyxhzBzBiRTjgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQjTTihiBQggzhhTzwAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAACjyDzRyyjjwCCTCjDAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSTCCDzwAjzwAjQywiAAgAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAAABzhQwDiRTixQxhSDDTDzzygAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAABSwTgQACjhjTSRyyAygQgDAAAAAAAAAAAAAAAAAAAABSAAAAARzzgAAgQAAAAAwAABDCBSSgwxhxwiwAQAxRiAAAAAAAAAAAAAAAAAAAAAABAAAAAABSgAAAAAAAAADAAAAAABBRhiAyAyBxSzhDTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAABTxSzjygTRgzwAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAQijixBDzTQAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAADiQyCAghCBgAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAABRzyxBDjDBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADyQgQSAwCygAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAASjhgTADjTTwAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAABCgiTzTxhxAwAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxzyDRCChgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBQzTiyRQCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADRSjgwRBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASCgAwTggAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSAzgyTQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDRABBQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACQBQQRSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABABCzyCgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAACywzBQAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAADCwhRQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAASySgjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACByCDyQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAByBiQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASTxRDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAABSgAAAAAAAAAAAAAAASCSASAiAAAAAAACAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAABRjxBRByAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSBTgBRwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzDyjBhygAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADyRzDCDzSgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASjCwCSQwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABChRDDSjQwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACxAAADDDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAARCgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABRQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABRgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAzwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAADzwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAADwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABTiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAACzwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAABAAAAAAABSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQgABhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABDAACigAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAACiwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAABzxgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACigAAAADxggTywAAAAAAQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAwAAAAAABAAAAABzhShDzgAADAABCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAABTAAAAQwAAAAAABzzADzzygAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAABCAAAAAADzzxTSjzywAAwAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADzCgDzzyhQBTwTyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAwAATwCizzxzxwBTzygACgAAAAwAQAAAAAAAAAAAAAAAAAAAAAAADyAAAAAAAAAAADzwDzwzyjzzzzwxygAABygAAADAAAAAAAAAAAAAAAAAAAAAAAAAAACgAAAAABCAAADDABABCTTzjDDzzzAAATjAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCQwwwwwwwAAQwwwwwwiyTiAwwDgAQwwAQwwwwwwwwwwwwwwAwwAwAQwwwwwwwwgAT/xAAC/9oADAMBAAIAAwAAABDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzjzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzjzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzjzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzDzTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyhyixzDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyjBzzzhTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzTzzzzzzzzzzzzzzzzzzzzzzzzzzyxxQDjTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzhzhCzTzjTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwRhySBhwBTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxzxSTDTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzDSjjhBzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyhiwyjTyTCQxDzzzzzzzzzzzzzzzzzzzzzzzzzjzzzzzzzzzzzzzzzzzzzzzzzzzzyyBgBzzxiBTzzzzzzzzzzzzzzzzzzzzzzzzzzzzTzzzzzzzzzzzzzzzzzzzzzzzzzhzwiSjQCxyDjDDDzzzzzzzzzzzzzzzzzzzzzzzxTzzzzzzzzzzzzzzzzzzzzzzzzwyjwxAQBziwRBBCzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyxTwCyBxRDTBiAjgQjzzzzzzzzzzzzzzzzzzzzzzjzzzzzzzzzzzzzzzzzzzzzzzzxQhgTCxQjSBABTDQwzjzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyhAyDDSQTRhhgQgxzRzzTzzzzzzzzzzzzzzzzzzzzxTzzzzzzzzzzzzzzzzzzzzzyBDTyggDiTyRQCizhhwAgBTzzzzzzzzzzzzzzzzzzzxTzzzzzzzzzzzzzzzzzzzzyjiBQgwQABBhxDggBhjTTwzzzzzzzzzzzzzzzzzzzzyhzzzzziAgTzzTjzzzzzDzzyzxyhzBDgjiywwRixBjxzzzzzzzzzzzzzzzzzzzzzzyzzzzzzyhTzzzzzzzzzwzzzzzzyxigjDwSxyzRhQCCzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwzzzzzzzzzzzzzzzzzzzzzjDRSTijgCTChzzzzzzzzzzzzzzzzzzzzzzzzyjzzzzzzzzzzzzzzzzzzzzzzzzzzzzgwgBCSzCSDzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzzzzzzzzzzwxDSzBzhCCTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyBSzzCQgAQTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxwizwhRDygjzzzzzzzzzzzzzzzzzzzzzzzzzyjzzzzzzzzzzzzzzzzzzzzzzzzzzzggBAxTAQzwzzzzzzzzzzzzzzzzzzzzzzzzzzyjzzzzzzzzzzzzzzzzzzzzzzzzzzzzDDAQiwgDyDzzzzzzzzzzzzzzzzzzzzzzzzzyjzzzzzzzzzzzzzzzzzzzzzzzzzzzzByBgyyBTSTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyxgjQRBDzzjzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyjRTijDTDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwghDAzRzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxxihCSRTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzywihAzwxTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxxQhyTTTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwhxjDjjzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzTzzzzzzzzzzzzzzzzzzzzyCTRxRjTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzjzzzzzzzzzzzzwCQAADTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzyDiSxyTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxhAzjgzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyiyAiTTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxASRDBTzzzzzzzzzzzzzzzzzzzzzzzzzzzzjzzzzzzzzzzyhTzzzzzzzzzzzzzzzihADhTDTzzzzzzxzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyyARjjyTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzywxCBhijzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyBRDQhARzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwTizihgijzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzgDCzhyBCTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyyBzywwCjjTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzygzzzzzyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzDzzzzzzzzgTTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyhDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzygTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyxzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyzzAjzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyjzzzzzzzzzzzzzzzzzzzzxCjzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzzzzzzzzzzzzzzzzzzzwDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxzTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwRzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyjzzzzzzzzzzzzzzzzzzzzzwQTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyjzzzzzzzzzzzzzyzzzzzzzzyDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzjTzzBzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzywzzwDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyBTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzhzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzjzzzzzzzzzzzzzzzzzzzzxDDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzjzzzzzyQiTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwBTzzzzwDRzgxjzzzzzzjTzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyjzzzzzDzzzzzzyzzzzzyQjByzSzzzwzzyxzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzyzzzzywzzzzjjzzzzzzyDyRiwzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzwzzz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" alt="Hari S">
-      <div class="photo-tag">CSE · CGPA 8.87</div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- STATS -->
-<div class="stats-bar">
-  <div class="stat-item">
-    <div class="stat-num">2250+</div>
-    <div class="stat-label">Problems Solved (SkillRack)</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num">500+</div>
-    <div class="stat-label">LeetCode Problems</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num">3</div>
-    <div class="stat-label">Hackathon Wins</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num">1200+</div>
-    <div class="stat-label">Students Trained</div>
-  </div>
-</div>
-
-<!-- EDUCATION -->
-<section id="education">
-  <div class="section-header">
-    <span class="section-num">01</span>
-    <h2 class="section-title">Education</h2>
-    <div class="section-line"></div>
-  </div>
-  <div class="edu-grid">
-    <div class="edu-card">
-      <div class="edu-degree">Bachelor of Engineering · Computer Science</div>
-      <div class="edu-school">Sri Sairam Engineering College</div>
-      <div class="edu-detail">Chennai — 600044 &nbsp;·&nbsp; July 2023 – Present</div>
-      <div class="edu-score">CGPA: 8.87 / 10</div>
+  <!-- STATS -->
+  <div class="stats-bar reveal">
+    <div class="stat-item">
+      <div class="stat-num">2250+</div>
+      <div class="stat-label">Problems Solved (SkillRack)</div>
     </div>
-    <div class="edu-card">
-      <div class="edu-degree">Higher Secondary · Computer Science Group</div>
-      <div class="edu-school">Sri Vishwas Vidhyalaya</div>
-      <div class="edu-detail">Aruppukottai — 626101 &nbsp;·&nbsp; March 2016 – March 2023</div>
-      <div class="edu-score">Percentage: 92%</div>
+    <div class="stat-item">
+      <div class="stat-num">500+</div>
+      <div class="stat-label">LeetCode Problems</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Hackathon Wins</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">1200+</div>
+      <div class="stat-label">Students Trained</div>
     </div>
   </div>
-</section>
 
-<!-- EXPERIENCE -->
-<section id="experience" style="background: var(--surface);">
-  <div class="section-header">
-    <span class="section-num">02</span>
-    <h2 class="section-title">Experience</h2>
-    <div class="section-line"></div>
-  </div>
-  <div class="exp-grid">
-    <div class="exp-card">
-      <div class="exp-top">
-        <div>
-          <div class="exp-role">Java Backend Developer Intern</div>
-          <div class="exp-company">BigSiBucks</div>
+  <!-- EDUCATION -->
+  <section id="education">
+    <div class="section-header reveal">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Education</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="edu-grid">
+      <div class="edu-card glass-card reveal reveal-delay-1">
+        <div class="edu-degree">Bachelor of Engineering · Computer Science</div>
+        <div class="edu-school">Sri Sairam Engineering College</div>
+        <div class="edu-detail">Chennai — 600044 &nbsp;·&nbsp; July 2023 – Present</div>
+        <div class="edu-score">CGPA: 8.87 / 10</div>
+      </div>
+      <div class="edu-card glass-card reveal reveal-delay-2">
+        <div class="edu-degree">Higher Secondary · Computer Science Group</div>
+        <div class="edu-school">Sri Vishwas Vidhyalaya</div>
+        <div class="edu-detail">Aruppukottai — 626101 &nbsp;·&nbsp; March 2016 – March 2023</div>
+        <div class="edu-score">Percentage: 92%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="section-header reveal">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Experience</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="exp-grid">
+      <div class="exp-card glass-card reveal">
+        <div class="exp-top">
+          <div>
+            <div class="exp-role">Java Backend Developer Intern</div>
+            <div class="exp-company">BigSiBucks</div>
+          </div>
+          <span class="exp-period">Aug 2024 – Sep 2024 · Chennai</span>
         </div>
-        <span class="exp-period">Aug 2024 – Sep 2024 · Chennai</span>
+        <ul class="exp-bullets">
+          <li>Developed and optimized backend services using Java and Spring Boot, improving API response time by 20%</li>
+          <li>Integrated 10+ REST APIs, enabling seamless data flow across multiple system components</li>
+          <li>Identified and resolved 25+ backend issues, increasing system stability and reducing failures by 30%</li>
+          <li>Contributed to scalable architecture improvements, supporting 2× increase in request handling capacity</li>
+        </ul>
       </div>
-      <ul class="exp-bullets">
-        <li>Developed and optimized backend services using Java and Spring Boot, improving API response time by 20%</li>
-        <li>Integrated 10+ REST APIs, enabling seamless data flow across multiple system components</li>
-        <li>Identified and resolved 25+ backend issues, increasing system stability and reducing failures by 30%</li>
-        <li>Contributed to scalable architecture improvements, supporting 2× increase in request handling capacity</li>
-      </ul>
-    </div>
-    <div class="exp-card">
-      <div class="exp-top">
-        <div>
-          <div class="exp-role">Core Member</div>
-          <div class="exp-company">CodeClub · Sri Sairam Engineering College</div>
+      <div class="exp-card glass-card reveal">
+        <div class="exp-top">
+          <div>
+            <div class="exp-role">Core Member</div>
+            <div class="exp-company">CodeClub · Sri Sairam Engineering College</div>
+          </div>
+          <span class="exp-period">2023 – Present</span>
         </div>
-        <span class="exp-period">2023 – Present</span>
+        <ul class="exp-bullets">
+          <li>Trained 1200+ students in Python, Java, and C programming languages</li>
+          <li>Conducted 10+ workshops, 30+ coding sessions, and various technical events</li>
+          <li>Organized and managed hackathons to foster coding culture on campus</li>
+          <li>Mentored 500+ students in programming concepts and data structures</li>
+        </ul>
       </div>
-      <ul class="exp-bullets">
-        <li>Trained 1200+ students in Python, Java, and C programming languages</li>
-        <li>Conducted 10+ workshops, 30+ coding sessions, and various technical events</li>
-        <li>Organized and managed hackathons to foster coding culture on campus</li>
-        <li>Mentored 500+ students in programming concepts and data structures</li>
-      </ul>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- SKILLS -->
-<section id="skills">
-  <div class="section-header">
-    <span class="section-num">03</span>
-    <h2 class="section-title">Skills</h2>
-    <div class="section-line"></div>
-  </div>
-  <div class="skills-grid">
-    <div class="skill-group">
-      <div class="skill-group-title">Programming Languages</div>
-      <div class="skill-tags">
-        <span class="skill-tag">Advanced Java</span>
-        <span class="skill-tag">Python</span>
-        <span class="skill-tag">C</span>
-        <span class="skill-tag">Kotlin</span>
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="section-header reveal">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Skills</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-group glass-card reveal">
+        <div class="skill-group-title">Programming Languages</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Advanced Java</span>
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">C</span>
+          <span class="skill-tag">Kotlin</span>
+        </div>
+      </div>
+      <div class="skill-group glass-card reveal">
+        <div class="skill-group-title">Libraries & Frameworks</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Spring</span>
+          <span class="skill-tag">Spring Boot</span>
+          <span class="skill-tag">Angular</span>
+        </div>
+      </div>
+      <div class="skill-group glass-card reveal">
+        <div class="skill-group-title">Tools & Platforms</div>
+        <div class="skill-tags">
+          <span class="skill-tag">IntelliJ IDEA</span>
+          <span class="skill-tag">VS Code</span>
+          <span class="skill-tag">GitHub</span>
+          <span class="skill-tag">Railway App</span>
+          <span class="skill-tag">Postman</span>
+        </div>
+      </div>
+      <div class="skill-group glass-card reveal">
+        <div class="skill-group-title">Databases & CS Concepts</div>
+        <div class="skill-tags">
+          <span class="skill-tag">PostgreSQL</span>
+          <span class="skill-tag">Distributed Systems</span>
+          <span class="skill-tag">OOPs</span>
+          <span class="skill-tag">DBMS</span>
+        </div>
       </div>
     </div>
-    <div class="skill-group">
-      <div class="skill-group-title">Libraries & Frameworks</div>
-      <div class="skill-tags">
-        <span class="skill-tag">Spring</span>
-        <span class="skill-tag">Spring Boot</span>
-        <span class="skill-tag">Angular</span>
-      </div>
-    </div>
-    <div class="skill-group">
-      <div class="skill-group-title">Tools & Platforms</div>
-      <div class="skill-tags">
-        <span class="skill-tag">IntelliJ IDEA</span>
-        <span class="skill-tag">VS Code</span>
-        <span class="skill-tag">GitHub</span>
-        <span class="skill-tag">Railway App</span>
-        <span class="skill-tag">Postman</span>
-      </div>
-    </div>
-    <div class="skill-group">
-      <div class="skill-group-title">Databases & CS Concepts</div>
-      <div class="skill-tags">
-        <span class="skill-tag">PostgreSQL</span>
-        <span class="skill-tag">Distributed Systems</span>
-        <span class="skill-tag">OOPs</span>
-        <span class="skill-tag">DBMS</span>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- PROJECTS -->
-<section id="projects" style="background: var(--surface);">
-  <div class="section-header">
-    <span class="section-num">04</span>
-    <h2 class="section-title">Projects</h2>
-    <div class="section-line"></div>
-  </div>
-  <div class="projects-grid">
-    <div class="project-card">
-      <div class="project-num">01</div>
-      <div class="project-stack">
-        <span class="project-tech">Spring Boot</span>
-        <span class="project-tech">Arduino</span>
-        <span class="project-tech">TinyML</span>
-        <span class="project-tech">Flutter</span>
-      </div>
-      <div class="project-title">Smart Safety Helmet<br>IoT Monitoring System</div>
-      <ul class="project-bullets">
-        <li>Backend services processing 1000+ data points/min with low-latency performance</li>
-        <li>Built 8+ REST APIs for alerts, location tracking & emergency notifications</li>
-        <li>Improved API response time by 25% and detection accuracy by 30%</li>
-      </ul>
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-header reveal">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Projects</h2>
+      <div class="section-line"></div>
     </div>
-    <div class="project-card">
-      <div class="project-num">02</div>
-      <div class="project-stack">
-        <span class="project-tech">Spring Boot</span>
-        <span class="project-tech">Python</span>
-        <span class="project-tech">OpenCV</span>
-        <span class="project-tech">YOLOv8</span>
-        <span class="project-tech">Twilio</span>
+    <div class="projects-grid">
+      <div class="project-card glass-card reveal">
+        <div class="project-num">01</div>
+        <div class="project-stack">
+          <span class="project-tech">Spring Boot</span>
+          <span class="project-tech">Arduino</span>
+          <span class="project-tech">TinyML</span>
+        </div>
+        <div class="project-title">Smart Safety Helmet<br>IoT Monitoring System</div>
+        <ul class="project-bullets">
+          <li>Backend services processing 1000+ data points/min with low-latency performance</li>
+          <li>Built 8+ REST APIs for alerts, location tracking & emergency notifications</li>
+          <li>Improved API response time by 25% and detection accuracy by 30%</li>
+        </ul>
       </div>
-      <div class="project-title">AI Traffic Manager<br>Smart Traffic System</div>
-      <ul class="project-bullets">
-        <li>Vehicle detection and lane counting with 90%+ detection accuracy</li>
-        <li>Dynamic signal control & emergency prioritization, reducing wait time by 25%</li>
-        <li>Optimized Twilio API for real-time automated incident alert notifications</li>
-      </ul>
-    </div>
-    <div class="project-card">
-      <div class="project-num">03</div>
-      <div class="project-stack">
-        <span class="project-tech">Python</span>
-        <span class="project-tech">Machine Learning</span>
-        <span class="project-tech">Angular</span>
+      <div class="project-card glass-card reveal">
+        <div class="project-num">02</div>
+        <div class="project-stack">
+          <span class="project-tech">Python</span>
+          <span class="project-tech">OpenCV</span>
+          <span class="project-tech">YOLOv8</span>
+        </div>
+        <div class="project-title">AI Traffic Manager<br>Smart Traffic System</div>
+        <ul class="project-bullets">
+          <li>Vehicle detection and lane counting with 90%+ detection accuracy</li>
+          <li>Dynamic signal control & emergency prioritization, reducing wait time by 25%</li>
+          <li>Optimized Twilio API for real-time automated incident alert notifications</li>
+        </ul>
       </div>
-      <div class="project-title">AI Budget Optimizer<br>Financial Analytics Tool</div>
-      <ul class="project-bullets">
-        <li>ML models for spending analysis with 85%+ prediction accuracy</li>
-        <li>Processes and analyzes 1000+ financial records, improving efficiency by 30%</li>
-        <li>Engineered 5+ REST APIs for interactive real-time dashboard integration</li>
-      </ul>
+      <div class="project-card glass-card reveal">
+        <div class="project-num">03</div>
+        <div class="project-stack">
+          <span class="project-tech">Machine Learning</span>
+          <span class="project-tech">Angular</span>
+        </div>
+        <div class="project-title">AI Budget Optimizer<br>Financial Analytics Tool</div>
+        <ul class="project-bullets">
+          <li>ML models for spending analysis with 85%+ prediction accuracy</li>
+          <li>Processes and analyzes 1000+ financial records, improving efficiency by 30%</li>
+          <li>Engineered 5+ REST APIs for interactive real-time dashboard integration</li>
+        </ul>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- HACKATHONS -->
-<section id="hackathons">
-  <div class="section-header">
-    <span class="section-num">05</span>
-    <h2 class="section-title">Hackathons</h2>
-    <div class="section-line"></div>
-  </div>
-  <div class="hackathon-grid">
-    <div class="hackathon-card">
-      <div class="hack-icon">🏆</div>
-      <div>
-        <div class="hack-badge">Winner</div>
-        <div class="hack-title">Solveathon — SoulSync</div>
-        <div class="hack-desc">Built a shoe customization software where users could personalize shoes per their preferences. Led backend development and entire workflow architecture.</div>
+  <!-- HACKATHONS -->
+  <section id="hackathons">
+    <div class="section-header reveal">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Hackathons</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="hackathon-grid">
+      <div class="hackathon-card glass-card reveal">
+        <div class="hack-icon">🏆</div>
+        <div>
+          <div class="hack-badge">Winner</div>
+          <div class="hack-title">Solveathon — SoulSync</div>
+          <div class="hack-desc">Built a shoe customization software where users could personalize shoes per their preferences. Led backend development and entire workflow architecture.</div>
+        </div>
+      </div>
+      <div class="hackathon-card glass-card reveal">
+        <div class="hack-icon">🥇</div>
+        <div>
+          <div class="hack-badge">Winner</div>
+          <div class="hack-title">SAIHackFest — SandSnap</div>
+          <div class="hack-desc">Developed backend for SandSnap application. Built robust API architecture and managed data effectively under tight time constraints.</div>
+        </div>
+      </div>
+      <div class="hackathon-card glass-card reveal">
+        <div class="hack-icon">🚦</div>
+        <div>
+          <div class="hack-badge">Participant</div>
+          <div class="hack-title">Ashes 1.0 — AI Traffic System</div>
+          <div class="hack-desc">Built an intelligent AI-based traffic management system. Applied computer vision and real-time signal control logic in a competitive hackathon setting.</div>
+        </div>
+      </div>
+      <div class="hackathon-card glass-card reveal">
+        <div class="hack-icon">🌬️</div>
+        <div>
+          <div class="hack-badge">Participant</div>
+          <div class="hack-title">HackNdore — Arigo AirGuard Pro</div>
+          <div class="hack-desc">Competed in Madhya Pradesh — developed an AI-based air quality monitoring project and built the complete frontend website for the solution.</div>
+        </div>
       </div>
     </div>
-    <div class="hackathon-card">
-      <div class="hack-icon">🥇</div>
-      <div>
-        <div class="hack-badge">Winner</div>
-        <div class="hack-title">SAIHackFest — SandSnap</div>
-        <div class="hack-desc">Developed backend for SandSnap application. Built robust API architecture and managed data effectively under tight time constraints.</div>
-      </div>
-    </div>
-    <div class="hackathon-card">
-      <div class="hack-icon">🚦</div>
-      <div>
-        <div class="hack-badge">Participant</div>
-        <div class="hack-title">Ashes 1.0 — AI Traffic System</div>
-        <div class="hack-desc">Built an intelligent AI-based traffic management system. Applied computer vision and real-time signal control logic in a competitive hackathon setting.</div>
-      </div>
-    </div>
-    <div class="hackathon-card">
-      <div class="hack-icon">🌬️</div>
-      <div>
-        <div class="hack-badge">Participant</div>
-        <div class="hack-title">HackNdore — Arigo AirGuard Pro</div>
-        <div class="hack-desc">Competed in Madhya Pradesh — developed an AI-based air quality monitoring project and built the complete frontend website for the solution.</div>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- CERTIFICATIONS -->
-<section id="certifications" style="background: var(--surface);">
-  <div class="section-header">
-    <span class="section-num">06</span>
-    <h2 class="section-title">Certifications &amp; Honors</h2>
-    <div class="section-line"></div>
-  </div>
-  <div class="cert-grid">
-    <div class="cert-item">
-      <div class="cert-dot"></div>
-      <span class="cert-text">Rank 1 in College — SkillRack Platform (2250+ problems)</span>
-      <span class="cert-badge">RANK #1</span>
+  <!-- CERTIFICATIONS -->
+  <section id="certifications">
+    <div class="section-header reveal">
+      <span class="section-num">06</span>
+      <h2 class="section-title">Certifications &amp; Honors</h2>
+      <div class="section-line"></div>
     </div>
-    <div class="cert-item">
-      <div class="cert-dot"></div>
-      <span class="cert-text">IoT — NPTEL Certification</span>
-      <span class="cert-badge">GOLD · 92%</span>
+    <div class="cert-grid">
+      <div class="cert-item glass-card reveal">
+        <div class="cert-dot"></div>
+        <span class="cert-text">Rank 1 in College — SkillRack Platform (2250+ problems)</span>
+        <span class="cert-badge">RANK #1</span>
+      </div>
+      <div class="cert-item glass-card reveal">
+        <div class="cert-dot"></div>
+        <span class="cert-text">IoT — NPTEL Certification</span>
+        <span class="cert-badge">GOLD · 92%</span>
+      </div>
+      <div class="cert-item glass-card reveal">
+        <div class="cert-dot"></div>
+        <span class="cert-text">Data Structures &amp; Algorithms (Java) — NPTEL</span>
+        <span class="cert-badge">ELITE SILVER</span>
+      </div>
+      <div class="cert-item glass-card reveal">
+        <div class="cert-dot"></div>
+        <span class="cert-text">500+ LeetCode · 300+ GFG · 100+ HackerRank</span>
+        <span class="cert-badge">TOP 75</span>
+      </div>
+      <div class="cert-item glass-card reveal">
+        <div class="cert-dot"></div>
+        <span class="cert-text">Published 2 Research Papers + Filed Patent in AI Projects</span>
+        <span class="cert-badge">PUBLISHED</span>
+      </div>
+      <div class="cert-item glass-card reveal">
+        <div class="cert-dot"></div>
+        <span class="cert-text">Data Science &amp; Analytics — HP Life</span>
+        <span class="cert-badge">CERTIFIED</span>
+      </div>
+      <div class="cert-item glass-card reveal">
+        <div class="cert-dot"></div>
+        <span class="cert-text">Networking Basics — Cisco Networking Academy</span>
+        <span class="cert-badge">CERTIFIED</span>
+      </div>
+      <div class="cert-item glass-card reveal">
+        <div class="cert-dot"></div>
+        <span class="cert-text">Winner — SAIHackFest &amp; Ashes 1.0 Hackathon</span>
+        <span class="cert-badge">WINNER</span>
+      </div>
     </div>
-    <div class="cert-item">
-      <div class="cert-dot"></div>
-      <span class="cert-text">Data Structures &amp; Algorithms (Java) — NPTEL</span>
-      <span class="cert-badge">ELITE SILVER</span>
-    </div>
-    <div class="cert-item">
-      <div class="cert-dot"></div>
-      <span class="cert-text">500+ LeetCode · 300+ GFG · 100+ HackerRank</span>
-      <span class="cert-badge">TOP 75</span>
-    </div>
-    <div class="cert-item">
-      <div class="cert-dot"></div>
-      <span class="cert-text">Published 2 Research Papers + Filed Patent in AI Projects</span>
-      <span class="cert-badge">PUBLISHED</span>
-    </div>
-    <div class="cert-item">
-      <div class="cert-dot"></div>
-      <span class="cert-text">Data Science &amp; Analytics — HP Life</span>
-      <span class="cert-badge">CERTIFIED</span>
-    </div>
-    <div class="cert-item">
-      <div class="cert-dot"></div>
-      <span class="cert-text">Networking Basics — Cisco Networking Academy</span>
-      <span class="cert-badge">CERTIFIED</span>
-    </div>
-    <div class="cert-item">
-      <div class="cert-dot"></div>
-      <span class="cert-text">Winner — SAIHackFest &amp; Ashes 1.0 Hackathon</span>
-      <span class="cert-badge">WINNER</span>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-logo">HARI S</div>
-  <ul class="footer-links">
-    <li><a href="https://leetcode.com" target="_blank">LeetCode</a></li>
-    <li><a href="https://github.com" target="_blank">GitHub</a></li>
-    <li><a href="https://linkedin.com" target="_blank">LinkedIn</a></li>
-    <li><a href="https://skillrack.com" target="_blank">SkillRack</a></li>
-  </ul>
-  <div class="footer-copy">© 2025 Hari S · Java Full Stack Developer</div>
-</footer>
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">HARI <span>S</span></div>
+    <ul class="footer-links">
+      <li><a href="https://leetcode.com" target="_blank">LeetCode</a></li>
+      <li><a href="https://github.com" target="_blank">GitHub</a></li>
+      <li><a href="https://linkedin.com" target="_blank">LinkedIn</a></li>
+      <li><a href="https://skillrack.com" target="_blank">SkillRack</a></li>
+    </ul>
+    <div class="footer-copy">© 2025 Hari S · Java Full Stack Developer</div>
+  </footer>
+
+</div> <!-- End Main Content -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Scroll Reveal Animation via Intersection Observer
+    const reveals = document.querySelectorAll('.reveal');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15
+    };
+
+    const revealOnScroll = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    reveals.forEach(el => revealOnScroll.observe(el));
+
+
+
+    // Navbar background blur on scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navbar.style.background = 'rgba(5,5,5,0.9)';
+        navbar.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+      } else {
+        navbar.style.background = 'rgba(5,5,5,0.7)';
+        navbar.style.borderBottom = '1px solid rgba(255,255,255,0.08)';
+      }
+    });
+  });
+</script>
 
 </body>
 </html>
